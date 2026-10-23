@@ -9,6 +9,8 @@ venv/
 # Éditeurs
 .idea/
 .vscode/
+!.vscode/
+!.vscode/settings.json
 
 # Fichiers système
 Thumbs.db
