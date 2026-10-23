@@ -16,6 +16,7 @@ CONFIG_PATH = PROJECT_ROOT / "config.toml"
 
 
 def compare_folder(main_folder: str, subfolder: str) -> dict:
+    """Compare a folder with one of its subfolders and return the comparison result."""
     main_folder_content = folder_mapper(full_path=main_folder, subdir_to_ignore=subfolder)
     subfolder_content = folder_mapper(f"{main_folder}/{subfolder}")
 

@@ -1,6 +1,14 @@
+from typing import TypedDict
 
 
-def content_comparator(folder_content:list, folder_content_copy:list) -> dict:
+class ComparisonResult(TypedDict):
+    is_folder_identical: bool
+    missing_content: list[str]
+
+
+def content_comparator(
+    folder_content: list[str], folder_content_copy: list[str]
+) -> ComparisonResult:
     """
     Vérifie que chaque élément du dossier d'origine existe dans la copie (comparaison des noms, sans tenir compte de la casse).
 
@@ -9,24 +17,15 @@ def content_comparator(folder_content:list, folder_content_copy:list) -> dict:
     :param folder_content_copy: Chemins relatifs du dossier copie (résultat de folder_mapper)
     :type folder_content_copy: list
     """
-    missing_content = []
-
-    # Les noms de la copie, en minuscules (casefold) pour que "IMG.JPG" et "img.jpg" soient considérés identiques.
-    # Un set permet une recherche instantanée, même avec des milliers de photos.
+    # Normalize the copy once so each lookup is constant-time.
     copy_names = {item.casefold() for item in folder_content_copy}
+    missing_content = [
+        item for item in folder_content if item.casefold() not in copy_names
+    ]
 
-    # check for each item in base folder, if there is missing files or folder in the copy
-    for item in folder_content:
-        # if an item is missing, add it to the missing content list (with its original name)
-        if item.casefold() not in copy_names:
-            missing_content.append(item)
-
-    # Return the result as a dict with 2 information
-    #   - a boolean to say if the subfolder is identical or not to the main folder
-    #   - a list of string representing the missing folder if there is missing ones
     return {
-        "is_folder_identical": len(missing_content)==0,  # True if no missing content, else False,
-        "missing_content": missing_content
+        "is_folder_identical": not missing_content,
+        "missing_content": missing_content,
     }
 
 
