@@ -68,6 +68,15 @@ Le dossier `test_folder` contient 3 cas pour tester le script en modifiant `doss
 - `test_folder/DIFFERENCE` : il manque des fichiers et des dossiers dans la sauvegarde.
 - `test_folder/CASSE` : la sauvegarde est complète, mais les noms n'ont pas la même casse et des `desktop.ini` ne sont présents que dans l'original.
 
+## Lancer les tests unitaires
+Les tests utilisent `unittest`, inclus dans Python. Depuis la racine du projet, lancer :
+
+```sh
+poetry run python -m unittest discover -s unittesting -v
+```
+
+Dans VS Code, ouvrir la vue **Testing** pour découvrir et lancer les tests. Si nécessaire, sélectionner l'environnement Python du projet avec **Python: Select Interpreter**.
+
 
 # Explication de bases en Python pour maintenir le script
 ## le f-string (ou string format)
