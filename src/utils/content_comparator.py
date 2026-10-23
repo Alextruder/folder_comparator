@@ -2,19 +2,23 @@
 
 def content_comparator(folder_content:list, folder_content_copy:list) -> dict:
     """
-    Docstring for content_comparator
-    
-    :param folder_content: Description
+    Vérifie que chaque élément du dossier d'origine existe dans la copie (comparaison des noms, sans tenir compte de la casse).
+
+    :param folder_content: Chemins relatifs du dossier d'origine (résultat de folder_mapper)
     :type folder_content: list
-    :param folder_copy_content: Description
-    :type folder_copy_content: list
+    :param folder_content_copy: Chemins relatifs du dossier copie (résultat de folder_mapper)
+    :type folder_content_copy: list
     """
     missing_content = []
 
+    # Les noms de la copie, en minuscules (casefold) pour que "IMG.JPG" et "img.jpg" soient considérés identiques.
+    # Un set permet une recherche instantanée, même avec des milliers de photos.
+    copy_names = {item.casefold() for item in folder_content_copy}
+
     # check for each item in base folder, if there is missing files or folder in the copy
     for item in folder_content:
-        # if an item is missing, add it to the missing content list
-        if item not in folder_content_copy:
+        # if an item is missing, add it to the missing content list (with its original name)
+        if item.casefold() not in copy_names:
             missing_content.append(item)
 
     # Return the result as a dict with 2 information
@@ -50,7 +54,10 @@ if __name__=="__main__":
         *FOLDER_CONTENT[5:9],       # Entrées 6 et 7
     ]
 
-    print(f"Folder with misisng_content: {FOLDER_COPY_CONTENT_MISSING}")
+    # Même contenu, mais avec une casse différente (doit être considéré identique)
+    FOLDER_COPY_CONTENT_CASE = [item.upper() for item in FOLDER_CONTENT]
+
+    print(f"Folder with missing_content: {FOLDER_COPY_CONTENT_MISSING}")
 
     print()
 
@@ -61,3 +68,8 @@ if __name__=="__main__":
 
     print("Test Missing:")
     print(content_comparator(FOLDER_CONTENT, FOLDER_COPY_CONTENT_MISSING))
+
+    print()
+
+    print("Test Case:")
+    print(content_comparator(FOLDER_CONTENT, FOLDER_COPY_CONTENT_CASE))

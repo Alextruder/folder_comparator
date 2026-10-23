@@ -1,0 +1,15 @@
+# Python
+__pycache__/
+*.py[cod]
+
+# Environnements virtuels (Poetry, venv)
+.venv/
+venv/
+
+# Éditeurs
+.idea/
+.vscode/
+
+# Fichiers système
+Thumbs.db
+.DS_Store

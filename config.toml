@@ -1,0 +1,9 @@
+# Configuration de la comparaison
+# Les chemins peuvent être absolus (ex: "D:/Photos/Vacances") ou relatifs à la racine du projet.
+# Sous Windows, utiliser des "/" ou doubler les "\\" dans les chemins.
+
+# Dossier qui contient les photos d'origine
+dossier_principal = "test_folder/DIFFERENCE"
+
+# Nom du sous-dossier de sauvegarde à vérifier (il doit se trouver dans dossier_principal)
+sous_dossier = "dont_touch"
