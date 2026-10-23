@@ -2,8 +2,12 @@ import sys
 import tomllib
 from pathlib import Path
 
-from src.utils.folder_mapper import folder_mapper
-from src.utils.content_comparator import content_comparator
+if __package__:
+    from .utils.content_comparator import content_comparator
+    from .utils.folder_mapper import folder_mapper
+else:
+    from utils.content_comparator import content_comparator
+    from utils.folder_mapper import folder_mapper
 
 
 # Racine du projet (le dossier qui contient src/ et config.toml)
