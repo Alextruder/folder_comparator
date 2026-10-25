@@ -1,16 +1,22 @@
+# Configuration des outils de développement uniquement : le programme n'a aucune dépendance.
 [project]
-name = "src"
+name = "folder_comparator"
 version = "0.1.0"
-description = ""
-authors = [
-    {name = "Alextruder",email = "alexandre.vignaud@efrei.net"}
-]
-readme = "README.md"
-requires-python = ">=3.12"
-dependencies = [
-]
+description = "Vérifie que chaque photo brute a sa version retouchée."
+requires-python = ">=3.13"
 
+[tool.ruff]
+line-length = 100
+target-version = "py313"
 
-[build-system]
-requires = ["poetry-core>=2.0.0,<3.0.0"]
-build-backend = "poetry.core.masonry.api"
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "SIM", "PTH"]
+
+[tool.mypy]
+python_version = "3.13"
+files = ["folder_comparator", "tests"]
+strict = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
