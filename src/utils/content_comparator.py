@@ -25,6 +25,24 @@ def expected_copy_name(
     return item
 
 
+def comparison_key(item: str) -> str:
+    """
+    Renvoie la clé de comparaison d'un élément : son chemin en minuscules, sans l'extension pour un fichier.
+
+    Ex: "Vacances/IMG_0001.CR2" -> "vacances/img_0001". Les dossiers gardent leur nom complet.
+    """
+    name = item.casefold()
+    if name.endswith("/"):
+        return name
+
+    folder, _, file_name = name.rpartition("/")
+    stem, dot, _ = file_name.rpartition(".")
+    # Un nom sans point, ou qui commence par un point (".photo"), n'a pas d'extension
+    if not dot or not stem:
+        return name
+    return f"{folder}/{stem}" if folder else stem
+
+
 def content_comparator(
     folder_content: list[str],
     folder_content_copy: list[str],
@@ -32,23 +50,26 @@ def content_comparator(
     extension_out: str | None = None,
 ) -> ComparisonResult:
     """
-    Vérifie que chaque élément du dossier d'origine existe dans la copie (comparaison des noms, sans tenir compte de la casse).
+    Vérifie que chaque élément du dossier d'origine existe dans la copie.
 
+    Les noms sont comparés sans tenir compte de la casse ni de l'extension des fichiers :
+    "IMG_0001.CR2" est présent si la copie contient "IMG_0001.psd", "img_0001.jpg"...
     Les éléments manquants sont renvoyés avec le nom attendu dans la copie (donc avec extension_out).
 
     :param folder_content: Chemins relatifs du dossier d'origine (résultat de folder_mapper)
     :type folder_content: list
     :param folder_content_copy: Chemins relatifs du dossier copie (résultat de folder_mapper)
     :type folder_content_copy: list
-    :param extension_in: Extension des fichiers du dossier d'origine qui changent d'extension dans la copie (sans le point)
-    :param extension_out: Extension de ces fichiers dans la copie (sans le point)
+    :param extension_in: Extension des fichiers du dossier d'origine à afficher avec extension_out s'ils manquent (sans le point)
+    :param extension_out: Extension à afficher pour ces fichiers manquants (sans le point)
     """
     # Normalize the copy once so each lookup is constant-time.
-    copy_names = {item.casefold() for item in folder_content_copy}
-    expected_names = [
-        expected_copy_name(item, extension_in, extension_out) for item in folder_content
+    copy_keys = {comparison_key(item) for item in folder_content_copy}
+    missing_content = [
+        expected_copy_name(item, extension_in, extension_out)
+        for item in folder_content
+        if comparison_key(item) not in copy_keys
     ]
-    missing_content = [name for name in expected_names if name.casefold() not in copy_names]
 
     return {
         "is_folder_identical": not missing_content,
