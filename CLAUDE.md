@@ -61,17 +61,24 @@ Un changement est terminé quand :
 - Committer sur `main`, faire un `git push --force`, réécrire l'historique.
 - Désactiver, sauter ou affaiblir un test pour obtenir du vert.
 - Coder une fonctionnalité de la section « Hors V1 » sans validation.
+- Contourner un garde-fou (script, variable, autre outil…). Si un garde-fou bloque une action qui
+  semble légitime, s'arrêter, expliquer le blocage à l'utilisateur et lui demander quoi faire.
 
 ## Garde-fous automatiques
 
 Ils sont configurés dans `.claude/settings.json` et exécutés par le harnais, pas par l'IA :
 
 - après chaque modification d'un `.py` : `ruff format` et `ruff check --fix` ;
-- avant chaque action : sont bloqués toute écriture dans `config.toml`, tout `git push --force` et
-  tout commit ou push sur `main` ;
+- avant chaque action (`.claude/hooks/guard.py`, testé par `tests/test_guard.py`) : sont bloqués
+  toute écriture dans le `config.toml` **du projet** (outils Edit/Write, redirections `>`, `cp`,
+  `mv`, `tee`, `sed -i`, `rm`, `python -c`…), tout `git push --force` et tout commit ou push sur
+  `main`. Un `config.toml` hors du projet (copie de test) reste autorisé ;
 - en fin de tour, si du code a changé : lint, typage et tests. Si c'est rouge, l'IA doit corriger
   avant de rendre la main ;
 - au démarrage d'une session cloud : installation de `requirements-dev.txt`.
+
+Ces hooks sont un filet contre les erreurs, pas un verrou : ils lisent le texte des commandes et ne
+voient pas ce que fait un script. Les règles de ce fichier restent la vraie barrière.
 
 La CI GitHub (`.github/workflows/ci.yml`) relance les mêmes vérifications sur Windows et macOS à
 chaque PR.
