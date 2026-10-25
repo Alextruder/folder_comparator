@@ -16,7 +16,7 @@ E:/Sauvegarde/Photos/   <- copy_folder (la sauvegarde à vérifier)
 ## Règles de comparaison
 - **Seuls les noms sont comparés**, pas le contenu : une photo retouchée ou recompressée qui garde son nom est considérée comme présente.
 - **La casse est ignorée** : `IMG_0001.JPG` et `img_0001.jpg` sont considérés comme le même fichier (idem pour les dossiers).
-- **L'extension peut changer entre l'original et la copie** : avec `extension_in = "CR2"` et `extension_out = "jpg"`, `IMG_0001.CR2` est considéré comme présent si la copie contient `IMG_0001.jpg`. Les fichiers des autres extensions et les dossiers doivent garder le même nom.
+- **L'extension peut changer entre l'original et la copie** : avec `extension_in = "CR2"` et `extension_out = "jpg"`, `IMG_0001.CR2` est considéré comme présent si la copie contient `IMG_0001.jpg`. S'il manque, il est affiché avec le nom attendu dans la copie (`IMG_0001.jpg`), pour savoir directement quel fichier créer. Les fichiers des autres extensions et les dossiers doivent garder le même nom.
 - **Les fichiers système sont ignorés** : `Thumbs.db`, `desktop.ini` et `.DS_Store`.
 - **La comparaison se fait dans un seul sens** : on vérifie que tout le dossier principal se retrouve dans la sauvegarde. Un fichier présent uniquement dans la sauvegarde n'est pas signalé.
 
@@ -65,7 +65,7 @@ OK : E:/Sauvegarde/Photos contient tout le contenu de D:/Photos.
 
 Résultat s'il manque des éléments (le script se termine alors avec le code de sortie 1) :
 ```
-2 élément(s) de D:/Photos absent(s) de E:/Sauvegarde/Photos :
+2 élément(s) de D:/Photos absent(s) de E:/Sauvegarde/Photos (noms attendus dans la copie) :
   - Vacances/
   - Vacances/IMG_0002.JPG
 ```

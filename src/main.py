@@ -106,7 +106,7 @@ if __name__ == "__main__":
     if result["is_folder_identical"]:
         print(f"OK : {COPY_FOLDER} contient tout le contenu de {MAIN_FOLDER}.")
     else:
-        print(f"{len(result['missing_content'])} élément(s) de {MAIN_FOLDER} absent(s) de {COPY_FOLDER} :")
+        print(f"{len(result['missing_content'])} élément(s) de {MAIN_FOLDER} absent(s) de {COPY_FOLDER} (noms attendus dans la copie) :")
         for item in result["missing_content"]:
             print(f"  - {item}")
         # Code de sortie 1 pour signaler qu'il manque des éléments

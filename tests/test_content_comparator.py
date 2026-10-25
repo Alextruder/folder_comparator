@@ -55,18 +55,29 @@ class ContentComparatorTests(unittest.TestCase):
             content_comparator(
                 ["IMG_0001.CR2"], ["IMG_0001.CR2"], extension_in="cr2", extension_out="jpg"
             ),
-            {"is_folder_identical": False, "missing_content": ["IMG_0001.CR2"]},
+            {"is_folder_identical": False, "missing_content": ["IMG_0001.jpg"]},
         )
 
-    def test_missing_converted_file_keeps_original_name(self):
+    def test_missing_converted_file_is_named_with_extension_out(self):
         self.assertEqual(
             content_comparator(
-                ["IMG_0001.CR2", "IMG_0002.CR2"],
-                ["IMG_0001.jpg"],
+                ["IMG_0001.CR2", "Vacances/", "Vacances/IMG_0002.cr2"],
+                ["IMG_0001.psd", "vacances/"],
                 extension_in="cr2",
-                extension_out="jpg",
+                extension_out="psd",
             ),
-            {"is_folder_identical": False, "missing_content": ["IMG_0002.CR2"]},
+            {"is_folder_identical": False, "missing_content": ["Vacances/IMG_0002.psd"]},
+        )
+
+    def test_missing_file_of_another_extension_keeps_its_name(self):
+        self.assertEqual(
+            content_comparator(
+                ["IMG_0001.CR2", "notes.txt"],
+                ["IMG_0001.psd"],
+                extension_in="cr2",
+                extension_out="psd",
+            ),
+            {"is_folder_identical": False, "missing_content": ["notes.txt"]},
         )
 
     def test_extension_does_not_apply_to_folders(self):

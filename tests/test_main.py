@@ -39,14 +39,14 @@ class CompareFolderTests(unittest.TestCase):
             result["missing_content"],
             [
                 "merging_file/sub/",
-                "merging_file/sub/test.cr2",
+                "merging_file/sub/test.ps2",
                 "watching/",
-                "watching/document1.cr2",
-                "watching/document1_txt.cr2",
-                "watching/document2.cr2",
+                "watching/document1.ps2",
+                "watching/document1_txt.ps2",
+                "watching/document2.ps2",
                 "watching/sub/",
-                "watching/sub/test.cr2",
-                "watching/unkonwn.cr2",
+                "watching/sub/test.ps2",
+                "watching/unkonwn.ps2",
             ],
         )
 
