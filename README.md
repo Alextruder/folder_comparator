@@ -1,8 +1,5 @@
 # Folder comparator
 
-> **V1 en cours de développement** : le programme n'est pas encore utilisable. Ce README décrit
-> le fonctionnement prévu.
-
 Vérifie que **chaque photo brute** d'un dossier a bien **sa version retouchée** dans un autre
 dossier, et liste celles qui manquent.
 
@@ -66,7 +63,15 @@ python -m folder_comparator
 
 Sur macOS, la commande peut s'appeler `python3`.
 
-Un résumé s'affiche à la fin, et trois fichiers sont écrits dans le dossier `.scraping/` :
+Un résumé s'affiche à la fin :
+
+```
+BASE     : 3 fichiers .csr
+RETOUCHE : 3 fichiers .psd
+Manquants : 1 -> voir D:/.../folder_comparator/.scraping/diff.txt
+```
+
+Trois fichiers sont écrits dans le dossier `.scraping/` :
 
 | Fichier | Contenu |
 |---|---|
@@ -74,7 +79,14 @@ Un résumé s'affiche à la fin, et trois fichiers sont écrits dans le dossier 
 | `out.txt` | Toutes les photos retouchées trouvées |
 | `diff.txt` | Les photos brutes **sans retouche** : c'est la liste à traiter |
 
-Ces fichiers sont remplacés à chaque lancement.
+Ces fichiers sont remplacés à chaque lancement. Un chemin s'écrit toujours avec des `/`, relatif
+au dossier BASE ou RETOUCHE.
+
+En cas de problème de configuration (fichier absent, clé manquante, dossier introuvable…), un
+message explique quoi corriger et rien n'est écrit.
+
+Pour une utilisation dans un script, le code de sortie vaut `0` si tout est retouché, `1` s'il
+manque des retouches et `2` en cas d'erreur de configuration.
 
 ## Développement
 
