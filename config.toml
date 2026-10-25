@@ -4,6 +4,10 @@
 
 # Dossier qui contient les photos d'origine
 dossier_principal = "test_folder/DIFFERENCE/original"
+# Facultatif : extension des fichiers de l'original qui changent d'extension dans la copie
+# extension_in = "CR2"
 
 # Dossier copie (la sauvegarde) à vérifier
 copy_folder = "test_folder/DIFFERENCE/copy"
+# Facultatif : extension de ces fichiers dans la copie (à renseigner avec extension_in)
+# extension_out = "jpg"

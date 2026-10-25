@@ -16,6 +16,7 @@ E:/Sauvegarde/Photos/   <- copy_folder (la sauvegarde à vérifier)
 ## Règles de comparaison
 - **Seuls les noms sont comparés**, pas le contenu : une photo retouchée ou recompressée qui garde son nom est considérée comme présente.
 - **La casse est ignorée** : `IMG_0001.JPG` et `img_0001.jpg` sont considérés comme le même fichier (idem pour les dossiers).
+- **L'extension peut changer entre l'original et la copie** : avec `extension_in = "CR2"` et `extension_out = "jpg"`, `IMG_0001.CR2` est considéré comme présent si la copie contient `IMG_0001.jpg`. Les fichiers des autres extensions et les dossiers doivent garder le même nom.
 - **Les fichiers système sont ignorés** : `Thumbs.db`, `desktop.ini` et `.DS_Store`.
 - **La comparaison se fait dans un seul sens** : on vérifie que tout le dossier principal se retrouve dans la sauvegarde. Un fichier présent uniquement dans la sauvegarde n'est pas signalé.
 
@@ -35,12 +36,17 @@ Les dossiers à comparer se règlent dans le fichier `config.toml`, à la racine
 ```toml
 # Dossier qui contient les photos d'origine
 dossier_principal = "D:/Photos"
+# Facultatif : extension des fichiers de l'original qui changent d'extension dans la copie
+extension_in = "CR2"
 
 # Dossier copie (la sauvegarde) à vérifier
 copy_folder = "E:/Sauvegarde/Photos"
+# Facultatif : extension de ces fichiers dans la copie
+extension_out = "jpg"
 ```
 
 - Chaque chemin peut être absolu (`D:/Photos`) ou relatif à la racine du projet (`test_folder/IDENTICAL/original`).
+- `extension_in` et `extension_out` sont facultatives, mais vont ensemble : renseigner les 2 ou aucune. On peut les écrire avec ou sans le point (`"jpg"` ou `".jpg"`), et la casse est ignorée.
 - Les 2 dossiers doivent être différents. Ne pas mettre le dossier copie à l'intérieur du dossier principal : son contenu serait compté comme faisant partie de l'original.
 - Sous Windows, écrire les chemins avec des `/` (`D:/Photos`) ou doubler les `\` (`D:\\Photos`).
 
@@ -69,6 +75,7 @@ Le dossier `test_folder` contient 3 cas. Chacun a un dossier `original/` (à met
 - `test_folder/IDENTICAL` : la sauvegarde est complète.
 - `test_folder/DIFFERENCE` : il manque des fichiers et des dossiers dans la sauvegarde.
 - `test_folder/CASSE` : la sauvegarde est complète, mais les noms n'ont pas la même casse et des `desktop.ini` ne sont présents que dans l'original.
+- `test_folder/EXTENSION` : les `.CR2` de l'original sont des `.jpg` dans la copie. Avec `extension_in = "CR2"` et `extension_out = "jpg"` la sauvegarde est complète ; sans ces clés, les 2 photos sont signalées comme manquantes.
 
 ## Lancer les tests unitaires
 Les tests utilisent `unittest`, inclus dans Python. Depuis la racine du projet, lancer :
