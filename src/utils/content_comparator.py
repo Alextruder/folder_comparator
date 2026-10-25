@@ -10,19 +10,19 @@ def expected_copy_name(
     item: str, extension_in: str | None = None, extension_out: str | None = None
 ) -> str:
     """
-    Renvoie le nom attendu dans la copie pour un élément du dossier d'origine, en minuscules.
+    Renvoie le nom attendu dans la copie pour un élément du dossier d'origine.
 
-    Un fichier qui se termine par .extension_in doit se retrouver avec .extension_out dans la copie.
+    Un fichier qui se termine par .extension_in doit se retrouver avec .extension_out dans la copie
+    (ex: "Vacances/IMG_0001.CR2" -> "Vacances/IMG_0001.psd").
     Les dossiers et les fichiers d'une autre extension gardent le même nom.
     """
-    name = item.casefold()
-    if extension_in is None or extension_out is None or name.endswith("/"):
-        return name
+    if extension_in is None or extension_out is None or item.endswith("/"):
+        return item
 
-    suffix_in = f".{extension_in.casefold()}"
-    if name.endswith(suffix_in) and len(name.rsplit("/", 1)[-1]) > len(suffix_in):
-        return f"{name.removesuffix(suffix_in)}.{extension_out.casefold()}"
-    return name
+    suffix_in = f".{extension_in}"
+    if item.casefold().endswith(suffix_in.casefold()) and len(item.rsplit("/", 1)[-1]) > len(suffix_in):
+        return f"{item[: -len(suffix_in)]}.{extension_out}"
+    return item
 
 
 def content_comparator(
@@ -34,6 +34,8 @@ def content_comparator(
     """
     Vérifie que chaque élément du dossier d'origine existe dans la copie (comparaison des noms, sans tenir compte de la casse).
 
+    Les éléments manquants sont renvoyés avec le nom attendu dans la copie (donc avec extension_out).
+
     :param folder_content: Chemins relatifs du dossier d'origine (résultat de folder_mapper)
     :type folder_content: list
     :param folder_content_copy: Chemins relatifs du dossier copie (résultat de folder_mapper)
@@ -43,11 +45,10 @@ def content_comparator(
     """
     # Normalize the copy once so each lookup is constant-time.
     copy_names = {item.casefold() for item in folder_content_copy}
-    missing_content = [
-        item
-        for item in folder_content
-        if expected_copy_name(item, extension_in, extension_out) not in copy_names
+    expected_names = [
+        expected_copy_name(item, extension_in, extension_out) for item in folder_content
     ]
+    missing_content = [name for name in expected_names if name.casefold() not in copy_names]
 
     return {
         "is_folder_identical": not missing_content,
