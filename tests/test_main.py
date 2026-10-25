@@ -60,18 +60,18 @@ class CompareFolderTests(unittest.TestCase):
 
         self.assertEqual(result, {"is_folder_identical": True, "missing_content": []})
 
-    def test_extension_folder_without_extensions_reports_missing_content(self):
-        result = compare_case("EXTENSION", None, None)
+    def test_extension_is_not_checked_without_extension_keys(self):
+        for case in ("IDENTICAL", "CASSE", "EXTENSION"):
+            with self.subTest(case=case):
+                result = compare_case(case, None, None)
 
-        self.assertCountEqual(
-            result["missing_content"], ["IMG_0001.CR2", "Vacances/IMG_0002.cr2"]
-        )
+                self.assertEqual(result, {"is_folder_identical": True, "missing_content": []})
 
-    def test_identical_folder_without_extensions_reports_every_file(self):
-        result = compare_case("IDENTICAL", None, None)
+    def test_different_folder_without_extension_keys_keeps_original_names(self):
+        result = compare_case("DIFFERENCE", None, None)
 
-        self.assertEqual(len(result["missing_content"]), 8)
-        self.assertTrue(all(item.endswith(".cr2") for item in result["missing_content"]))
+        self.assertIn("watching/document1.cr2", result["missing_content"])
+        self.assertEqual(len(result["missing_content"]), 9)
 
     def test_folders_can_be_anywhere(self):
         """Les 2 dossiers n'ont pas besoin d'être l'un dans l'autre."""

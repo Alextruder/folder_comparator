@@ -50,12 +50,41 @@ class ContentComparatorTests(unittest.TestCase):
             {"is_folder_identical": True, "missing_content": []},
         )
 
-    def test_file_keeping_extension_in_is_reported_missing(self):
+    def test_extension_is_not_checked(self):
         self.assertEqual(
             content_comparator(
-                ["IMG_0001.CR2"], ["IMG_0001.CR2"], extension_in="cr2", extension_out="jpg"
+                ["IMG_0001.CR2", "IMG_0002.cr2", "notes.txt", "photo.xmp"],
+                ["img_0001.psd", "IMG_0002.CR2", "notes.md", "photo"],
             ),
-            {"is_folder_identical": False, "missing_content": ["IMG_0001.jpg"]},
+            {"is_folder_identical": True, "missing_content": []},
+        )
+
+    def test_missing_file_keeps_its_name_without_extensions(self):
+        self.assertEqual(
+            content_comparator(["IMG_0001.CR2", "IMG_0002.CR2"], ["IMG_0001.psd"]),
+            {"is_folder_identical": False, "missing_content": ["IMG_0002.CR2"]},
+        )
+
+    def test_only_the_last_extension_is_skipped(self):
+        self.assertEqual(
+            content_comparator(["archive.tar.gz"], ["archive.zip"]),
+            {"is_folder_identical": False, "missing_content": ["archive.tar.gz"]},
+        )
+
+    def test_file_without_dot_or_starting_with_dot_is_compared_whole(self):
+        self.assertEqual(
+            content_comparator(["README", ".hidden"], ["README.md", ".hidden"]),
+            {"is_folder_identical": True, "missing_content": []},
+        )
+        self.assertEqual(
+            content_comparator([".hidden"], [".other"]),
+            {"is_folder_identical": False, "missing_content": [".hidden"]},
+        )
+
+    def test_folder_with_same_stem_does_not_count_as_file(self):
+        self.assertEqual(
+            content_comparator(["IMG_0001.CR2"], ["IMG_0001/"]),
+            {"is_folder_identical": False, "missing_content": ["IMG_0001.CR2"]},
         )
 
     def test_missing_converted_file_is_named_with_extension_out(self):

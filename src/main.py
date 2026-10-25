@@ -101,7 +101,7 @@ if __name__ == "__main__":
     )
 
     if EXTENSION_IN is not None:
-        print(f"Les fichiers .{EXTENSION_IN} de l'original sont cherchés en .{EXTENSION_OUT} dans la copie.")
+        print(f"Les fichiers .{EXTENSION_IN} manquants sont affichés en .{EXTENSION_OUT}.")
 
     if result["is_folder_identical"]:
         print(f"OK : {COPY_FOLDER} contient tout le contenu de {MAIN_FOLDER}.")

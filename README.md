@@ -16,7 +16,9 @@ E:/Sauvegarde/Photos/   <- copy_folder (la sauvegarde à vérifier)
 ## Règles de comparaison
 - **Seuls les noms sont comparés**, pas le contenu : une photo retouchée ou recompressée qui garde son nom est considérée comme présente.
 - **La casse est ignorée** : `IMG_0001.JPG` et `img_0001.jpg` sont considérés comme le même fichier (idem pour les dossiers).
-- **L'extension peut changer entre l'original et la copie** : avec `extension_in = "CR2"` et `extension_out = "jpg"`, `IMG_0001.CR2` est considéré comme présent si la copie contient `IMG_0001.jpg`. S'il manque, il est affiché avec le nom attendu dans la copie (`IMG_0001.jpg`), pour savoir directement quel fichier créer. Les fichiers des autres extensions et les dossiers doivent garder le même nom.
+- **L'extension des fichiers n'est pas vérifiée** : `IMG_0001.CR2` est considéré comme présent si la copie contient `IMG_0001.psd`, `IMG_0001.jpg` ou `IMG_0001` avec n'importe quelle extension. Seule la dernière extension est retirée (`archive.tar.gz` est comparé comme `archive.tar`). Les dossiers, eux, doivent garder le même nom.
+- **Affichage des manquants** : avec `extension_in = "CR2"` et `extension_out = "psd"`, un `IMG_0001.CR2` manquant est affiché `IMG_0001.psd`, pour savoir directement quel fichier créer. Sans ces clés, il est affiché avec son nom d'origine.
+- **Attention** : comme l'extension est ignorée, `IMG_0001.CR2` et `IMG_0001.xmp` dans l'original sont tous les deux considérés comme présents dès que la copie contient un seul `IMG_0001.psd`.
 - **Les fichiers système sont ignorés** : `Thumbs.db`, `desktop.ini` et `.DS_Store`.
 - **La comparaison se fait dans un seul sens** : on vérifie que tout le dossier principal se retrouve dans la sauvegarde. Un fichier présent uniquement dans la sauvegarde n'est pas signalé.
 
@@ -36,17 +38,17 @@ Les dossiers à comparer se règlent dans le fichier `config.toml`, à la racine
 ```toml
 # Dossier qui contient les photos d'origine
 dossier_principal = "D:/Photos"
-# Facultatif : extension des fichiers de l'original qui changent d'extension dans la copie
+# Facultatif : extension des fichiers de l'original à afficher autrement s'ils manquent
 extension_in = "CR2"
 
 # Dossier copie (la sauvegarde) à vérifier
 copy_folder = "E:/Sauvegarde/Photos"
-# Facultatif : extension de ces fichiers dans la copie
-extension_out = "jpg"
+# Facultatif : extension à afficher pour ces fichiers manquants
+extension_out = "psd"
 ```
 
 - Chaque chemin peut être absolu (`D:/Photos`) ou relatif à la racine du projet (`test_folder/IDENTICAL/original`).
-- `extension_in` et `extension_out` sont facultatives, mais vont ensemble : renseigner les 2 ou aucune. On peut les écrire avec ou sans le point (`"jpg"` ou `".jpg"`), et la casse est ignorée.
+- `extension_in` et `extension_out` ne servent qu'à l'affichage des fichiers manquants. Elles sont facultatives, mais vont ensemble : renseigner les 2 ou aucune. On peut les écrire avec ou sans le point (`"jpg"` ou `".jpg"`), et la casse est ignorée.
 - Les 2 dossiers doivent être différents. Ne pas mettre le dossier copie à l'intérieur du dossier principal : son contenu serait compté comme faisant partie de l'original.
 - Sous Windows, écrire les chemins avec des `/` (`D:/Photos`) ou doubler les `\` (`D:\\Photos`).
 
@@ -71,11 +73,11 @@ Résultat s'il manque des éléments (le script se termine alors avec le code de
 ```
 
 ## Les dossiers de test
-Le dossier `test_folder` contient 4 cas. Chacun a un dossier `original/` (à mettre dans `dossier_principal`) et un dossier `copy/` (à mettre dans `copy_folder`). Les fichiers de `original/` sont en `.cr2` et ceux de `copy/` en `.ps2` : il faut donc garder `extension_in = "cr2"` et `extension_out = "ps2"` dans `config.toml` (c'est le réglage par défaut).
+Le dossier `test_folder` contient 4 cas. Chacun a un dossier `original/` (à mettre dans `dossier_principal`) et un dossier `copy/` (à mettre dans `copy_folder`). Les fichiers de `original/` sont en `.cr2` et ceux de `copy/` en `.ps2`. Avec `extension_in = "cr2"` et `extension_out = "ps2"` (le réglage par défaut de `config.toml`), les manquants sont affichés en `.ps2`.
 - `test_folder/IDENTICAL` : la sauvegarde est complète.
 - `test_folder/DIFFERENCE` : il manque des fichiers et des dossiers dans la sauvegarde.
 - `test_folder/CASSE` : la sauvegarde est complète, mais les noms n'ont pas la même casse et des `desktop.ini` ne sont présents que dans l'original.
-- `test_folder/EXTENSION` : mélange de casses dans les extensions (`.CR2`/`.cr2` d'un côté, `.ps2`/`.PS2` de l'autre), plus un `notes.txt` qui garde son extension. Sans `extension_in` et `extension_out`, les 2 photos sont signalées comme manquantes.
+- `test_folder/EXTENSION` : mélange de casses dans les extensions (`.CR2`/`.cr2` d'un côté, `.ps2`/`.PS2` de l'autre), plus un `notes.txt` qui garde son extension. La sauvegarde est complète, avec ou sans `extension_in` et `extension_out`.
 
 ## Lancer les tests unitaires
 Les tests utilisent `unittest`, inclus dans Python. Depuis la racine du projet, lancer :
