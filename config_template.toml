@@ -1,0 +1,19 @@
+# Modèle de configuration de folder_comparator.
+#
+# 1. Copier ce fichier et nommer la copie config.toml (dans le même dossier).
+# 2. Remplacer les valeurs ci-dessous par les vôtres.
+#
+# Chemins : utiliser des / même sous Windows (exemple : "D:/Photos/Bruts").
+# Extensions : avec ou sans point, majuscules ou minuscules ("csr", ".CSR"...).
+
+# Dossier des photos brutes
+BASE_PATH = "D:/Photos/Bruts"
+
+# Dossier des photos retouchées
+RETOUCHE_PATH = "E:/Photos/Retouches"
+
+# Extension des photos brutes à vérifier (une seule)
+BASE_FILE_EXTENSION = "csr"
+
+# Extension des photos retouchées (une seule)
+RETOUCHE_FILE_EXTENSION = "psd"

@@ -1,17 +1,26 @@
+# Configuration personnelle (voir config_template.toml)
+config.toml
+
+# Sorties du programme : seul le dossier est versionné
+.scraping/*
+!.scraping/.gitkeep
+
 # Python
 __pycache__/
 *.py[cod]
-
-# Environnements virtuels (Poetry, venv)
 .venv/
-venv/
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
 
 # Éditeurs
 .idea/
 .vscode/
-!.vscode/
-!.vscode/settings.json
 
 # Fichiers système
 Thumbs.db
+desktop.ini
 .DS_Store
+
+# Réglages locaux de Claude Code
+.claude/settings.local.json

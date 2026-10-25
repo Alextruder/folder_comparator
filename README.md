@@ -1,191 +1,83 @@
 # Folder comparator
-Vérifie qu'un dossier copie (la sauvegarde) contient bien toutes les photos et tous les dossiers d'un dossier d'origine. Les 2 dossiers sont indépendants : ils peuvent être n'importe où, par exemple sur 2 disques différents.
+
+> **V1 en cours de développement** : le programme n'est pas encore utilisable. Ce README décrit
+> le fonctionnement prévu.
+
+Vérifie que **chaque photo brute** d'un dossier a bien **sa version retouchée** dans un autre
+dossier, et liste celles qui manquent.
 
 ```
-D:/Photos/              <- dossier_principal
-├── IMG_0001.JPG
-└── Vacances/
-    └── IMG_0002.JPG
+D:/Photos/Bruts/              (BASE_PATH, extension "csr")
+├── IMG_0001.csr
+├── notes.txt                 <- ignoré : ce n'est pas un .csr
+└── Mariage/
+    ├── IMG_0002.csr
+    └── IMG_0003.csr
 
-E:/Sauvegarde/Photos/   <- copy_folder (la sauvegarde à vérifier)
-├── img_0001.jpg
-└── vacances/
-    └── img_0002.jpg
+E:/Photos/Retouches/          (RETOUCHE_PATH, extension "psd")
+├── img_0001.psd
+└── mariage/
+    └── IMG_0002.psd
+
+Résultat : Mariage/IMG_0003.csr est manquant.
 ```
 
-## Règles de comparaison
-- **Seuls les noms sont comparés**, pas le contenu : une photo retouchée ou recompressée qui garde son nom est considérée comme présente.
-- **La casse est ignorée** : `IMG_0001.JPG` et `img_0001.jpg` sont considérés comme le même fichier (idem pour les dossiers).
-- **L'extension des fichiers n'est pas vérifiée** : `IMG_0001.CR2` est considéré comme présent si la copie contient `IMG_0001.psd`, `IMG_0001.jpg` ou `IMG_0001` avec n'importe quelle extension. Seule la dernière extension est retirée (`archive.tar.gz` est comparé comme `archive.tar`). Les dossiers, eux, doivent garder le même nom.
-- **Affichage des manquants** : avec `extension_in = "CR2"` et `extension_out = "psd"`, un `IMG_0001.CR2` manquant est affiché `IMG_0001.psd`, pour savoir directement quel fichier créer. Sans ces clés, il est affiché avec son nom d'origine.
-- **Attention** : comme l'extension est ignorée, `IMG_0001.CR2` et `IMG_0001.xmp` dans l'original sont tous les deux considérés comme présents dès que la copie contient un seul `IMG_0001.psd`.
-- **Les fichiers système sont ignorés** : `Thumbs.db`, `desktop.ini` et `.DS_Store`.
-- **La comparaison se fait dans un seul sens** : on vérifie que tout le dossier principal se retrouve dans la sauvegarde. Un fichier présent uniquement dans la sauvegarde n'est pas signalé.
+## Règles de vérification
 
-# Configuration du programme
-## Poetry
-### Installer Poetry
-Pour installer Poetry, suivre ce [lien](https://python-poetry.org/docs/).
+- Une photo brute est retrouvée si la retouche a le **même nom**, au **même endroit** (même
+  sous-dossier), avec l'extension de retouche.
+- Les **majuscules et minuscules** sont ignorées : `IMG_0001.csr` et `img_0001.PSD` correspondent.
+- Le nom doit être **exactement le même** : `IMG_0001-Edit.psd` ne compte pas pour
+  `IMG_0001.csr`.
+- Les fichiers d'une autre extension sont ignorés.
+- La vérification se fait dans **un seul sens** : une retouche sans brut n'est pas signalée.
+- Le programme **ne modifie jamais** vos dossiers de photos : il ne fait que les lire.
 
-### Commandes basiques
-1) Initialiser un nouvel environment vide: `poetry init`.
-2) Générer le fichier lock à installer: `poetry lock`.
-3) **Installer** l'environnement: `poetry install`. Il s'agit de la commande à utiliser pour pouvoir générer l'environnement pour lancer le code (les étapes précédentes ne sont pas nécessaires car les fichiers sont déjà générés).
+## Installation
 
-## Le fichier `config.toml`
-Les dossiers à comparer se règlent dans le fichier `config.toml`, à la racine du projet :
+Il faut **Python 3.13** ([python.org](https://www.python.org/downloads/)). Aucune autre
+installation n'est nécessaire.
+
+```bash
+git clone https://github.com/Alextruder/folder_comparator.git
+cd folder_comparator
+```
+
+## Configuration
+
+Copier `config_template.toml` en `config.toml`, puis remplir les quatre valeurs :
 
 ```toml
-# Dossier qui contient les photos d'origine
-dossier_principal = "D:/Photos"
-# Facultatif : extension des fichiers de l'original à afficher autrement s'ils manquent
-extension_in = "CR2"
-
-# Dossier copie (la sauvegarde) à vérifier
-copy_folder = "E:/Sauvegarde/Photos"
-# Facultatif : extension à afficher pour ces fichiers manquants
-extension_out = "psd"
+BASE_PATH = "D:/Photos/Bruts"
+RETOUCHE_PATH = "E:/Photos/Retouches"
+BASE_FILE_EXTENSION = "csr"
+RETOUCHE_FILE_EXTENSION = "psd"
 ```
 
-- Chaque chemin peut être absolu (`D:/Photos`) ou relatif à la racine du projet (`test_folder/IDENTICAL/original`).
-- `extension_in` et `extension_out` ne servent qu'à l'affichage des fichiers manquants. Elles sont facultatives, mais vont ensemble : renseigner les 2 ou aucune. On peut les écrire avec ou sans le point (`"jpg"` ou `".jpg"`), et la casse est ignorée.
-- Les 2 dossiers doivent être différents. Ne pas mettre le dossier copie à l'intérieur du dossier principal : son contenu serait compté comme faisant partie de l'original.
-- Sous Windows, écrire les chemins avec des `/` (`D:/Photos`) ou doubler les `\` (`D:\\Photos`).
+`config.toml` reste sur votre ordinateur : il n'est jamais envoyé sur GitHub.
 
-## Le script
-Il n'y a pas d'installation supplémentaire à réaliser pour lancer le script (il n'utilise que la bibliothèque standard de Python 3.12).
+## Utilisation
 
-Pour lancer la comparaison, il faut:
-1) Renseigner les dossiers dans `config.toml`
-2) Se placer à la racine du projet (le dossier qui contient `config.toml` et `src/`)
-3) Dans un terminal/cmd, lancer la commande suivante: `poetry run python -m src.main` (ou `python -m src.main` sans Poetry)
+Depuis le dossier du projet :
 
-Résultat si tout est présent :
-```
-OK : E:/Sauvegarde/Photos contient tout le contenu de D:/Photos.
+```bash
+python -m folder_comparator
 ```
 
-Résultat s'il manque des éléments (le script se termine alors avec le code de sortie 1) :
-```
-2 élément(s) de D:/Photos absent(s) de E:/Sauvegarde/Photos (noms attendus dans la copie) :
-  - Vacances/
-  - Vacances/IMG_0002.JPG
-```
+Sur macOS, la commande peut s'appeler `python3`.
 
-## Les dossiers de test
-Le dossier `test_folder` contient 4 cas. Chacun a un dossier `original/` (à mettre dans `dossier_principal`) et un dossier `copy/` (à mettre dans `copy_folder`). Les fichiers de `original/` sont en `.cr2` et ceux de `copy/` en `.ps2`. Avec `extension_in = "cr2"` et `extension_out = "ps2"` (le réglage par défaut de `config.toml`), les manquants sont affichés en `.ps2`.
-- `test_folder/IDENTICAL` : la sauvegarde est complète.
-- `test_folder/DIFFERENCE` : il manque des fichiers et des dossiers dans la sauvegarde.
-- `test_folder/CASSE` : la sauvegarde est complète, mais les noms n'ont pas la même casse et des `desktop.ini` ne sont présents que dans l'original.
-- `test_folder/EXTENSION` : mélange de casses dans les extensions (`.CR2`/`.cr2` d'un côté, `.ps2`/`.PS2` de l'autre), plus un `notes.txt` qui garde son extension. La sauvegarde est complète, avec ou sans `extension_in` et `extension_out`.
+Un résumé s'affiche à la fin, et trois fichiers sont écrits dans le dossier `.scraping/` :
 
-## Lancer les tests unitaires
-Les tests utilisent `unittest`, inclus dans Python. Depuis la racine du projet, lancer :
+| Fichier | Contenu |
+|---|---|
+| `in.txt` | Toutes les photos brutes trouvées |
+| `out.txt` | Toutes les photos retouchées trouvées |
+| `diff.txt` | Les photos brutes **sans retouche** : c'est la liste à traiter |
 
-```sh
-poetry run python -m unittest discover -s tests -v
-```
+Ces fichiers sont remplacés à chaque lancement.
 
-Dans VS Code, ouvrir la vue **Testing** pour découvrir et lancer les tests. Si nécessaire, sélectionner l'environnement Python du projet avec **Python: Select Interpreter**.
+## Développement
 
-
-# Explication de bases en Python pour maintenir le script
-## le f-string (ou string format)
-Le f-string permet d'injecter une variable directement dans un string en ajoutant la lettre f devant une déclaration de string. 
-
-Le f-string se présente de cette manière: `f"Le contenu de ma variable: {VARIABLE}"`.
-
-Dans ce cadre, si on a `VARIABLE = "Bonjour"`, le résultat sera le suivant: 
-`Le contenu de ma variable: Bonjour`
-
-## La bibliothèque OS
-La bibliothèque OS permet d'intéragir avec le système d'opération (Operating System) de la machine. Les cas d'utilisations les plus fréquents sont les suivants: 
-- Ouvrir, fermer un fichier pour lire le contenu voire écrire dedans
-- Récupérer des informations sur des fichiers ou des dossiers ou les modifier
-- Créer, supprimer ou modifier les droits sur des fichiers ou des dossiers
-
-## La concaténation de types
-Dans le contexte général, on veut pouvoir concaténer des variables entres elles facilement. Il existe en général des fonctions verbeuses pour le faire, mais aussi des raccourcis.
-- Pour les strings: il suffit juste de les "additionner"
-```python
-a = "Bonjour"
-b = "Monde"
-print(a+b)
-```
-Résultat: `BonjourMonde`
-- Pour les listes, il est aussi possible de les concaténer. 
-```python
-a = ["a", "b", "c"]
-b = ["c","d"]
-c = a + b
-print(f"c={c}")
-d = [*a, *b]
-print(f"d={d}")
-```
-Résultat:
-```
-c=['a', 'b', 'c', 'c', 'd']
-d=['a', 'b', 'c', 'c', 'd']
-```
-A noter que pour enlever les duplicats, on peut faire un `list(set(c))` &rarr; `['a', 'b', 'c', 'd']` (attention, un `set` ne garde pas forcément l'ordre des éléments).
-
-L'inconvénient avec la 1ère méthode `list1 + list2` est qu'on ne peut concaténer que des listes entres elles, et non ajouter des strings dedans. 
-
-L'avantage de la seconde méthode, c'est qu'elle permet de mettre à plat toutes les valeurs de la liste. Si on veut rajouter un string dans une concaténation, on peut faire comme ceci: 
-```python
-a = ["a", "b", "c"]
-b = ["c","d"]
-c = "Bonjour"
-print([*a,*b,c]) # pas de * pour c car c'est un string et non une liste
-```
-Résultat: `['a', 'b', 'c', 'c', 'd', 'Bonjour']`.
-
-## Inline conditions
-Il ne s'agit pas forcément des meilleures pratiques car moins lisibles pour les personnes n'ayant pas l'habitude. 
-
-### If [...] else [...]
-Les conditions if... else... peuvent s'exprimer de 2 manières différentes: 
-```python
-# Classique
-a = 2
-b = 3
-if a > b: print("upper")
-else: print("lower or equal")
-
-# Inline
-print("upper" if a > b else "lower or equal")
-```
-
-### `For` loops
-On peut faire la même chose avec les boucles `for`:
-```python
-# on veut doubler la valeur de chaque entier de a
-a = [10, 5, 40, 24, 3]
-
-# Classique
-b = []
-for i in a: 
-    b.append(i * 2) # on prend chaque valeur et la multiplie par 2
-
-# Inline
-b = [i * 2 for i in a]
-```
-
-A noter qu'on peut utiliser un inline `for` avec un inline `If [...] else [...]`
-
-```python
-a = [2, 6, 12, 5]
-
-# Si la valeur est inférieure à 6, on la multiplie par 2, sinon on "oublie" cette valeur
-b = [i * 2 for i in a if i < 6] 
-print(f"b={b}")
-
-# Si la valeur est inférieure à 6, on la double, sinon elle reste telle quelle
-c = [i * 2 if i < 6 else i for i in a]
-print(f"c={c}")
-```
-Résultat: 
-```
-b=[4, 10]
-c=[4, 6, 12, 10]
-```
+Les règles détaillées sont dans [`docs/BESOINS.md`](docs/BESOINS.md), les principes de code dans
+[`docs/PRINCIPES.md`](docs/PRINCIPES.md), et le guide de travail de l'IA dans
+[`CLAUDE.md`](CLAUDE.md).
