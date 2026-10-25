@@ -32,8 +32,11 @@ Un photographe travaille avec deux dossiers :
   ignorée.
 - **R3** : le fichier `config_template.toml` est versionné et documente chaque clé. `config.toml`
   n'est jamais versionné : il est listé dans le `.gitignore`.
-- **R4** : si `config.toml` est absent, si une clé manque ou si un des dossiers n'existe pas, le
-  programme s'arrête avec un message clair en français, sans rien écrire.
+- **R4** : le programme s'arrête avec un message clair en français, sans rien écrire, si :
+  - `config.toml` est absent ou n'est pas un TOML valide ;
+  - une clé manque, ou sa valeur n'est pas du texte ;
+  - une extension est vide ;
+  - un des chemins n'existe pas ou n'est pas un dossier.
 
 ### Collecte
 
@@ -62,12 +65,19 @@ Un photographe travaille avec deux dossiers :
   - `diff.txt` : les fichiers de BASE absents de RETOUCHE (R7 à R10), avec leur nom BASE.
 - **R12** : chaque fichier contient une ligne par fichier, en chemin relatif au dossier racine
   concerné, avec `/` comme séparateur quel que soit le système, en UTF-8 et triée par ordre
-  alphabétique.
+  alphabétique sans tenir compte de la casse.
 - **R13** : les trois fichiers sont écrasés à chaque lancement, sans historique.
 - **R14** : le dossier `.scraping/` existe dès le clonage du dépôt, grâce à `.scraping/.gitkeep`.
   Son contenu n'est jamais versionné.
 - **R15** : en fin d'exécution, le programme affiche un résumé dans la console : nombre de fichiers
   dans BASE, nombre dans RETOUCHE, nombre de manquants, et chemin de `diff.txt`.
+
+### Exécution
+
+- **R17** : `config.toml` et `.scraping/` sont cherchés à la racine du projet (le dossier qui
+  contient `folder_comparator/`), quel que soit le dossier d'où la commande est lancée.
+- **R18** : le code de sortie vaut `0` si aucun fichier ne manque, `1` s'il y a des manquants et
+  `2` en cas d'erreur de configuration (R4).
 
 ### Sécurité
 
@@ -97,3 +107,5 @@ Un photographe travaille avec deux dossiers :
 | 2026-10-25 | La configuration est en TOML : `config.toml` est ignoré par git, `config_template.toml` est versionné (R1, R3). |
 | 2026-10-25 | Les sorties vont dans `.scraping/` (`in.txt`, `out.txt`, `diff.txt`), qui est écrasé à chaque lancement (R11 à R14). |
 | 2026-10-25 | Interface : `python -m`, principe KISS. Plateformes : Windows et macOS, Python 3.13 (C1, C2). |
+| 2026-10-25 | Plan de la V1 : erreurs de configuration détaillées (R4), tri sans tenir compte de la casse (R12), racine du projet (R17), codes de sortie (R18). |
+| 2026-10-25 | Un dossier RETOUCHE rangé dans BASE n'est pas traité à part en V1 : ses fichiers n'ont pas l'extension BASE. |
