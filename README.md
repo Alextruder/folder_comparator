@@ -1,15 +1,16 @@
 # Folder comparator
-Vérifie qu'un sous-dossier de sauvegarde (par exemple `dont_touch`) contient bien toutes les photos et tous les dossiers de son dossier parent.
+Vérifie qu'un dossier copie (la sauvegarde) contient bien toutes les photos et tous les dossiers d'un dossier d'origine. Les 2 dossiers sont indépendants : ils peuvent être n'importe où, par exemple sur 2 disques différents.
 
 ```
-Photos/                 <- dossier_principal
+D:/Photos/              <- dossier_principal
 ├── IMG_0001.JPG
-├── Vacances/
-│   └── IMG_0002.JPG
-└── dont_touch/         <- sous_dossier (la sauvegarde à vérifier)
-    ├── img_0001.jpg
-    └── vacances/
-        └── img_0002.jpg
+└── Vacances/
+    └── IMG_0002.JPG
+
+E:/Sauvegarde/Photos/   <- copy_folder (la sauvegarde à vérifier)
+├── img_0001.jpg
+└── vacances/
+    └── img_0002.jpg
 ```
 
 ## Règles de comparaison
@@ -35,11 +36,12 @@ Les dossiers à comparer se règlent dans le fichier `config.toml`, à la racine
 # Dossier qui contient les photos d'origine
 dossier_principal = "D:/Photos"
 
-# Nom du sous-dossier de sauvegarde à vérifier (il doit se trouver dans dossier_principal)
-sous_dossier = "dont_touch"
+# Dossier copie (la sauvegarde) à vérifier
+copy_folder = "E:/Sauvegarde/Photos"
 ```
 
-- `dossier_principal` peut être un chemin absolu (`D:/Photos`) ou relatif à la racine du projet (`test_folder/IDENTICAL`).
+- Chaque chemin peut être absolu (`D:/Photos`) ou relatif à la racine du projet (`test_folder/IDENTICAL/original`).
+- Les 2 dossiers doivent être différents. Ne pas mettre le dossier copie à l'intérieur du dossier principal : son contenu serait compté comme faisant partie de l'original.
 - Sous Windows, écrire les chemins avec des `/` (`D:/Photos`) ou doubler les `\` (`D:\\Photos`).
 
 ## Le script
@@ -52,18 +54,18 @@ Pour lancer la comparaison, il faut:
 
 Résultat si tout est présent :
 ```
-OK : le sous-dossier 'dont_touch' contient tout le contenu de D:/Photos.
+OK : E:/Sauvegarde/Photos contient tout le contenu de D:/Photos.
 ```
 
 Résultat s'il manque des éléments (le script se termine alors avec le code de sortie 1) :
 ```
-2 élément(s) de D:/Photos absent(s) de 'dont_touch' :
+2 élément(s) de D:/Photos absent(s) de E:/Sauvegarde/Photos :
   - Vacances/
   - Vacances/IMG_0002.JPG
 ```
 
 ## Les dossiers de test
-Le dossier `test_folder` contient 3 cas pour tester le script en modifiant `dossier_principal` :
+Le dossier `test_folder` contient 3 cas. Chacun a un dossier `original/` (à mettre dans `dossier_principal`) et un dossier `copy/` (à mettre dans `copy_folder`) :
 - `test_folder/IDENTICAL` : la sauvegarde est complète.
 - `test_folder/DIFFERENCE` : il manque des fichiers et des dossiers dans la sauvegarde.
 - `test_folder/CASSE` : la sauvegarde est complète, mais les noms n'ont pas la même casse et des `desktop.ini` ne sont présents que dans l'original.

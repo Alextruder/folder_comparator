@@ -3,7 +3,7 @@
 # Sous Windows, utiliser des "/" ou doubler les "\\" dans les chemins.
 
 # Dossier qui contient les photos d'origine
-dossier_principal = "test_folder/DIFFERENCE"
+dossier_principal = "test_folder/DIFFERENCE/original"
 
-# Nom du sous-dossier de sauvegarde à vérifier (il doit se trouver dans dossier_principal)
-sous_dossier = "dont_touch"
+# Dossier copie (la sauvegarde) à vérifier
+copy_folder = "test_folder/DIFFERENCE/copy"
