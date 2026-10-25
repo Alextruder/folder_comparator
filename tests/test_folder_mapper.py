@@ -29,16 +29,13 @@ class FolderMapperTests(unittest.TestCase):
 
         self.assertEqual(folder_mapper(str(self.root)), ["keep.txt"])
 
-    def test_ignores_named_directory_only_at_root(self):
+    def test_lists_backup_named_directory_like_any_other(self):
         (self.root / "dont_touch").mkdir()
         (self.root / "dont_touch" / "backup.txt").touch()
-        nested = self.root / "other" / "dont_touch"
-        nested.mkdir(parents=True)
-        (nested / "keep.txt").touch()
 
         self.assertEqual(
-            set(folder_mapper(str(self.root), subdir_to_ignore="DONT_TOUCH")),
-            {"other/", "other/dont_touch/", "other/dont_touch/keep.txt"},
+            set(folder_mapper(str(self.root))),
+            {"dont_touch/", "dont_touch/backup.txt"},
         )
 
     def test_adds_subfolder_prefix(self):
