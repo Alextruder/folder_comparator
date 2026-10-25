@@ -6,8 +6,30 @@ class ComparisonResult(TypedDict):
     missing_content: list[str]
 
 
+def expected_copy_name(
+    item: str, extension_in: str | None = None, extension_out: str | None = None
+) -> str:
+    """
+    Renvoie le nom attendu dans la copie pour un élément du dossier d'origine, en minuscules.
+
+    Un fichier qui se termine par .extension_in doit se retrouver avec .extension_out dans la copie.
+    Les dossiers et les fichiers d'une autre extension gardent le même nom.
+    """
+    name = item.casefold()
+    if extension_in is None or extension_out is None or name.endswith("/"):
+        return name
+
+    suffix_in = f".{extension_in.casefold()}"
+    if name.endswith(suffix_in) and len(name.rsplit("/", 1)[-1]) > len(suffix_in):
+        return f"{name.removesuffix(suffix_in)}.{extension_out.casefold()}"
+    return name
+
+
 def content_comparator(
-    folder_content: list[str], folder_content_copy: list[str]
+    folder_content: list[str],
+    folder_content_copy: list[str],
+    extension_in: str | None = None,
+    extension_out: str | None = None,
 ) -> ComparisonResult:
     """
     Vérifie que chaque élément du dossier d'origine existe dans la copie (comparaison des noms, sans tenir compte de la casse).
@@ -16,11 +38,15 @@ def content_comparator(
     :type folder_content: list
     :param folder_content_copy: Chemins relatifs du dossier copie (résultat de folder_mapper)
     :type folder_content_copy: list
+    :param extension_in: Extension des fichiers du dossier d'origine qui changent d'extension dans la copie (sans le point)
+    :param extension_out: Extension de ces fichiers dans la copie (sans le point)
     """
     # Normalize the copy once so each lookup is constant-time.
     copy_names = {item.casefold() for item in folder_content_copy}
     missing_content = [
-        item for item in folder_content if item.casefold() not in copy_names
+        item
+        for item in folder_content
+        if expected_copy_name(item, extension_in, extension_out) not in copy_names
     ]
 
     return {
@@ -72,3 +98,10 @@ if __name__=="__main__":
 
     print("Test Case:")
     print(content_comparator(FOLDER_CONTENT, FOLDER_COPY_CONTENT_CASE))
+
+    print()
+
+    # Les .txt de l'original sont des .md dans la copie
+    FOLDER_COPY_CONTENT_EXTENSION = [item.replace(".txt", ".md") for item in FOLDER_CONTENT]
+    print("Test Extension:")
+    print(content_comparator(FOLDER_CONTENT, FOLDER_COPY_CONTENT_EXTENSION, "txt", "md"))

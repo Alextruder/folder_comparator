@@ -8,11 +8,13 @@ from src.main import PROJECT_ROOT, compare_folder, load_config
 TEST_FOLDER = PROJECT_ROOT / "test_folder"
 
 
-def compare_case(case: str) -> dict:
+def compare_case(case: str, extension_in: str | None = None, extension_out: str | None = None) -> dict:
     """Compare les dossiers original/ et copy/ d'un cas de test_folder."""
     return compare_folder(
         (TEST_FOLDER / case / "original").as_posix(),
         (TEST_FOLDER / case / "copy").as_posix(),
+        extension_in,
+        extension_out,
     )
 
 
@@ -47,6 +49,18 @@ class CompareFolderTests(unittest.TestCase):
         result = compare_case("CASSE")
 
         self.assertEqual(result, {"is_folder_identical": True, "missing_content": []})
+
+    def test_extension_folder_with_extensions(self):
+        result = compare_case("EXTENSION", "CR2", "jpg")
+
+        self.assertEqual(result, {"is_folder_identical": True, "missing_content": []})
+
+    def test_extension_folder_without_extensions_reports_missing_content(self):
+        result = compare_case("EXTENSION")
+
+        self.assertCountEqual(
+            result["missing_content"], ["IMG_0001.CR2", "Vacances/IMG_0002.cr2"]
+        )
 
     def test_folders_can_be_anywhere(self):
         """Les 2 dossiers n'ont pas besoin d'être l'un dans l'autre."""
@@ -88,6 +102,8 @@ class LoadConfigTests(unittest.TestCase):
             (
                 (TEST_FOLDER / "IDENTICAL" / "original").as_posix(),
                 (TEST_FOLDER / "IDENTICAL" / "copy").as_posix(),
+                None,
+                None,
             ),
         )
 
@@ -101,8 +117,53 @@ class LoadConfigTests(unittest.TestCase):
 
         self.assertEqual(
             load_config(self.config_path),
-            ((self.root / "photos").as_posix(), (self.root / "sauvegarde").as_posix()),
+            ((self.root / "photos").as_posix(), (self.root / "sauvegarde").as_posix(), None, None),
         )
+
+    def test_extensions_are_read_without_leading_dot(self):
+        self.write_config(
+            'dossier_principal = "test_folder/EXTENSION/original"\n'
+            'extension_in = ".CR2"\n'
+            'copy_folder = "test_folder/EXTENSION/copy"\n'
+            'extension_out = "jpg"\n'
+        )
+
+        self.assertEqual(load_config(self.config_path)[2:], ("CR2", "jpg"))
+
+    def test_empty_extensions_are_ignored(self):
+        self.write_config(
+            'dossier_principal = "test_folder/EXTENSION/original"\n'
+            'extension_in = ""\n'
+            'copy_folder = "test_folder/EXTENSION/copy"\n'
+            'extension_out = ""\n'
+        )
+
+        self.assertEqual(load_config(self.config_path)[2:], (None, None))
+
+    def test_only_one_extension_exits(self):
+        self.write_config(
+            'dossier_principal = "test_folder/EXTENSION/original"\n'
+            'extension_in = "CR2"\n'
+            'copy_folder = "test_folder/EXTENSION/copy"\n'
+        )
+
+        with self.assertRaises(SystemExit) as context:
+            load_config(self.config_path)
+
+        self.assertIn("à la fois 'extension_in' et 'extension_out'", str(context.exception.code))
+
+    def test_extension_that_is_not_text_exits(self):
+        self.write_config(
+            'dossier_principal = "test_folder/EXTENSION/original"\n'
+            'extension_in = 2\n'
+            'copy_folder = "test_folder/EXTENSION/copy"\n'
+            'extension_out = "jpg"\n'
+        )
+
+        with self.assertRaises(SystemExit) as context:
+            load_config(self.config_path)
+
+        self.assertIn("'extension_in' doit être un texte", str(context.exception.code))
 
     def test_missing_config_file_exits(self):
         with self.assertRaises(SystemExit) as context:
