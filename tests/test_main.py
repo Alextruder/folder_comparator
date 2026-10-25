@@ -6,9 +6,14 @@ from src.main import PROJECT_ROOT, compare_folder, load_config
 
 
 TEST_FOLDER = PROJECT_ROOT / "test_folder"
+# Dans test_folder, les fichiers de original/ sont en .cr2 et ceux de copy/ en .ps2
+EXTENSION_IN = "cr2"
+EXTENSION_OUT = "ps2"
 
 
-def compare_case(case: str, extension_in: str | None = None, extension_out: str | None = None) -> dict:
+def compare_case(
+    case: str, extension_in: str | None = EXTENSION_IN, extension_out: str | None = EXTENSION_OUT
+) -> dict:
     """Compare les dossiers original/ et copy/ d'un cas de test_folder."""
     return compare_folder(
         (TEST_FOLDER / case / "original").as_posix(),
@@ -34,14 +39,14 @@ class CompareFolderTests(unittest.TestCase):
             result["missing_content"],
             [
                 "merging_file/sub/",
-                "merging_file/sub/test.txt",
+                "merging_file/sub/test.cr2",
                 "watching/",
-                "watching/document1.json",
-                "watching/document1.txt",
-                "watching/document2.png",
+                "watching/document1.cr2",
+                "watching/document1_txt.cr2",
+                "watching/document2.cr2",
                 "watching/sub/",
-                "watching/sub/test.txt",
-                "watching/unkonwn.jpg",
+                "watching/sub/test.cr2",
+                "watching/unkonwn.cr2",
             ],
         )
 
@@ -51,16 +56,22 @@ class CompareFolderTests(unittest.TestCase):
         self.assertEqual(result, {"is_folder_identical": True, "missing_content": []})
 
     def test_extension_folder_with_extensions(self):
-        result = compare_case("EXTENSION", "CR2", "jpg")
+        result = compare_case("EXTENSION", "CR2", "PS2")
 
         self.assertEqual(result, {"is_folder_identical": True, "missing_content": []})
 
     def test_extension_folder_without_extensions_reports_missing_content(self):
-        result = compare_case("EXTENSION")
+        result = compare_case("EXTENSION", None, None)
 
         self.assertCountEqual(
             result["missing_content"], ["IMG_0001.CR2", "Vacances/IMG_0002.cr2"]
         )
+
+    def test_identical_folder_without_extensions_reports_every_file(self):
+        result = compare_case("IDENTICAL", None, None)
+
+        self.assertEqual(len(result["missing_content"]), 8)
+        self.assertTrue(all(item.endswith(".cr2") for item in result["missing_content"]))
 
     def test_folders_can_be_anywhere(self):
         """Les 2 dossiers n'ont pas besoin d'être l'un dans l'autre."""

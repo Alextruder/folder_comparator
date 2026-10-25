@@ -71,11 +71,11 @@ Résultat s'il manque des éléments (le script se termine alors avec le code de
 ```
 
 ## Les dossiers de test
-Le dossier `test_folder` contient 3 cas. Chacun a un dossier `original/` (à mettre dans `dossier_principal`) et un dossier `copy/` (à mettre dans `copy_folder`) :
+Le dossier `test_folder` contient 4 cas. Chacun a un dossier `original/` (à mettre dans `dossier_principal`) et un dossier `copy/` (à mettre dans `copy_folder`). Les fichiers de `original/` sont en `.cr2` et ceux de `copy/` en `.ps2` : il faut donc garder `extension_in = "cr2"` et `extension_out = "ps2"` dans `config.toml` (c'est le réglage par défaut).
 - `test_folder/IDENTICAL` : la sauvegarde est complète.
 - `test_folder/DIFFERENCE` : il manque des fichiers et des dossiers dans la sauvegarde.
 - `test_folder/CASSE` : la sauvegarde est complète, mais les noms n'ont pas la même casse et des `desktop.ini` ne sont présents que dans l'original.
-- `test_folder/EXTENSION` : les `.CR2` de l'original sont des `.jpg` dans la copie. Avec `extension_in = "CR2"` et `extension_out = "jpg"` la sauvegarde est complète ; sans ces clés, les 2 photos sont signalées comme manquantes.
+- `test_folder/EXTENSION` : mélange de casses dans les extensions (`.CR2`/`.cr2` d'un côté, `.ps2`/`.PS2` de l'autre), plus un `notes.txt` qui garde son extension. Sans `extension_in` et `extension_out`, les 2 photos sont signalées comme manquantes.
 
 ## Lancer les tests unitaires
 Les tests utilisent `unittest`, inclus dans Python. Depuis la racine du projet, lancer :
